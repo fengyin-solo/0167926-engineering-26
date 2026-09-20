@@ -1,11 +1,18 @@
-version: '3.8'
-
 services:
   frontend-admin:
+    # 镜像由 scripts/release.sh 用本地构建出的同一份 dist 构建：
+    #   docker build -t $IMAGE_REF frontend-admin
+    # 这样容器内不会重复安装依赖/构建，保证与本机预览结果一致。
+    image: ${IMAGE_REF:-subtitle-translator/frontend-admin:latest}
     build:
       context: ./frontend-admin
       dockerfile: Dockerfile
     ports:
-      - "8081:80"
+      - "${HOST_PORT:-8081}:80"
     restart: unless-stopped
     container_name: subtitle-translator-frontend
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/"]
+      interval: 10s
+      timeout: 3s
+      retries: 5

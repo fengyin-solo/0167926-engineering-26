@@ -34,3 +34,6 @@ coverage/
 
 # Docker
 .docker/
+
+# Release pipeline logs & working files
+.release/

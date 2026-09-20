@@ -1,0 +1,8 @@
+# 镜像只需要本地构建产物 dist/ 和 nginx 配置，
+# 其余内容（源码、node_modules 等）一律不发送给 docker daemon。
+# 配合 scripts/release.sh：镜像内不再执行 npm 安装/构建。
+*
+!dist/
+!dist/**
+!nginx.conf
+!Dockerfile
