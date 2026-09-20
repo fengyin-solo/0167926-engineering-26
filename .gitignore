@@ -34,3 +34,6 @@ coverage/
 
 # Docker
 .docker/
+
+# Pipeline
+.pipeline/

@@ -20,6 +20,35 @@ npm run dev
 |------|------|------|
 | frontend-admin | 8081 | 字幕翻译前端应用 |
 
+## 自动化校验与发布流水线
+
+`scripts/pipeline.sh` 把原来分散的手工步骤串成一条可重复执行的流程：
+
+```
+环境检查 → 安装依赖(npm ci) → 类型检查(tsc) → 构建静态产物 → 容器构建并启动服务 → 本机/容器一致性校验
+```
+
+```bash
+scripts/pipeline.sh          # 完整流程(本机校验 + 容器发布),或 make pipeline
+scripts/pipeline.sh --local  # 只跑本机部分,无 docker 的环境使用,或 make local
+scripts/pipeline.sh --clean  # 先深度清理(node_modules/容器/镜像)再跑
+scripts/pipeline.sh clean    # 只清理不运行,或 make clean
+scripts/pipeline.sh -v       # 各阶段日志实时输出(默认只写日志文件)
+```
+
+- **哪一步卡住、什么原因**:每步有独立超时(超时被强制终止并标记「超时」),失败时终端显示
+  步骤名、退出码和日志末尾,完整日志在 `.pipeline/logs/`,最后打印全流程汇总表。
+- **改完重跑干净**:每次运行自动清理上一次的中间产物(重装依赖、清 dist、重建容器、重置日志),
+  直接重跑同一条命令即可;`--clean` 额外清掉 node_modules 与容器镜像。
+- **两处结果一致**:最后一步分别抓取本机预览(4173 端口)与容器服务(8081 端口)的页面及全部
+  静态资源,逐个比对 sha256,不一致会 diff 出具体文件并判失败。
+- 各阶段超时(秒)可用环境变量覆盖:`DEPS_TIMEOUT=600 TYPECHECK_TIMEOUT=180 BUILD_TIMEOUT=300
+  CONTAINER_TIMEOUT=1200 WAIT_TIMEOUT=90 VERIFY_TIMEOUT=120`;容器地址可用 `CONTAINER_URL` 覆盖。
+- macOS 需先 `brew install coreutils`(提供 timeout 命令)。
+
+> 说明:`frontend-admin/.dockerignore` 排除了本机 `node_modules`/`dist`,否则它们会被
+> `COPY . .` 带进镜像覆盖容器内依赖,导致容器构建与本机结果不一致。
+
 ## 测试账号
 
 本项目为纯前端应用，无需登录账号。

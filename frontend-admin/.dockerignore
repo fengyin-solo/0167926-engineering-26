@@ -1,0 +1,8 @@
+# 构建上下文只应包含源码与配置。
+# 本机的 node_modules / dist 可能与镜像内平台不一致(如 macOS 产物进入 Linux 镜像),
+# 一旦被打包进去会覆盖 Dockerfile 里 npm ci 装好的依赖,导致构建失败或结果不一致。
+node_modules
+dist
+.pipeline
+*.log
+.DS_Store

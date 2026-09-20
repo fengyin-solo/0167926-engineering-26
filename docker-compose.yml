@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   frontend-admin:
     build:
@@ -9,3 +7,9 @@ services:
       - "8081:80"
     restart: unless-stopped
     container_name: subtitle-translator-frontend
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
